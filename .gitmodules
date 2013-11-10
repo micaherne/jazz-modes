@@ -1,0 +1,7 @@
+[submodule "teoria"]
+    path = teoria
+    url = https://github.com/saebekassebil/teoria.git
+    
+[submodule "vexflow"]
+    path = vexflow
+    url = https://github.com/0xfe/vexflow.git

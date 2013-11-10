@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="jquery-2.0.3.js"></script>
+<script type="text/javascript" src="teoria/dist/teoria.js"></script>
+<script type="text/javascript" src="vexflow/build/vexflow/vexflow-min.js"></script>
+<script type="text/javascript" src="modes.js"></script>
+<script type="text/javascript">
+
+var scales = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
+// var rootsAdvanced = ['c','c#','db','d','d#','eb','e','f','f#','gb','g','g#','ab','a','a#','bb','b'];
+var roots = ['c','db','d','eb','e','f','f#','gb','g','ab','a','bb','b'];
+$(document).ready(function() {
+	scientificToVexflow = function(sc) {
+		a = sc.split('');
+		var octave = a.pop();
+		var params = {};
+		if (a.length == 2) {
+			if (a[1] == 'x') {
+				a[1] = '##';
+			}
+		}
+		a.push('/');
+		a.push(octave);
+		return a.join('').toLowerCase();
+	};
+	var scale = scales[Math.floor(Math.random()*scales.length)];
+	var root = roots[Math.floor(Math.random()*roots.length)];
+
+	var a4 = teoria.note(root + '4');
+	var a4mix = a4.scale(scale);
+	  var canvas = $("canvas#stave")[0];
+	  var renderer = new Vex.Flow.Renderer(canvas,
+	    Vex.Flow.Renderer.Backends.CANVAS);
+
+	  var ctx = renderer.getContext();
+	  var stave = new Vex.Flow.Stave(10, 0, 600);
+	  stave.addClef("treble").setContext(ctx).draw();
+	  
+	  var notes = [];
+	  var modeNotes = a4mix.notes();
+	  for (var i = 0; i < 7; i++) {
+		  noteName = scientificToVexflow(modeNotes[i].scientific());
+		  var renderNote = new Vex.Flow.StaveNote({ keys: [noteName], duration: "4" });
+		  var accidental = modeNotes[i].accidental();
+		  if (accidental != '') {
+			  if (accidental == 'x') {
+				  accidental = '##';
+			  }
+			  renderNote.addAccidental(0, new Vex.Flow.Accidental(accidental));
+		  }
+		  notes.push(renderNote);
+	  }
+	  // Create a voice in 4/4
+	  var voice = new Vex.Flow.Voice({
+	    num_beats: 7,
+	    beat_value: 4,
+	    resolution: Vex.Flow.RESOLUTION
+	  });
+
+	  // Add notes to voice
+	  voice.addTickables(notes);
+
+	  // Format and justify the notes to 500 pixels
+	  var formatter = new Vex.Flow.Formatter().
+	    joinVoices([voice]).format([voice], 500);
+
+	  // Render voice
+	  voice.draw(ctx, stave);
+	  
+	  // Set name
+	  var scaleName = root.toUpperCase() + " " + scale;
+	  $('div#name').text(scaleName);
+});
+
+</script>
+<title>Insert title here</title>
+</head>
+<body>
+<div id="name"></div>
+<canvas id="stave" width=700 height=200"></canvas> 
+</body>
+</html>
