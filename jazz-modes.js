@@ -53,8 +53,8 @@
 		},
 		
 		_basicRandomMode: function() {
-			var scale = this.scales[Math.floor(Math.random()*scales.length)];
-			var root = this.roots[Math.floor(Math.random()*roots.length)];
+			var scale = this.scales[Math.floor(Math.random()*this.scales.length)];
+			var root = this.roots[Math.floor(Math.random()*this.roots.length)];
 
 			var note = teoria.note(root + '4');
 			return note.scale(scale);
@@ -111,8 +111,53 @@
 			  voice.draw(ctx, stave);
 		},
 		
+		showNotes: function(mode, container) {
+			var result = [];
+			var modeNotes = mode.notes();
+			for (var i = 0; i < 7; i++) {
+				result.push(modeNotes[i].name().toUpperCase() + modeNotes[i].accidental());
+			}
+			container.text(result.join(" "));
+		},
+		
 		modeName: function(mode) {
 			return mode.tonic.name().toUpperCase() + mode.tonic.accidental() + " " + mode.name;
+		},
+		
+		Game: {
+			IdentifyTheMode: function(container, config) {
+				// Create a canvas for showing the notation
+				var staveCanvas = $('<canvas class="canvas" width="700" height="200"></canvas>');
+				$(container).append(staveCanvas);
+				
+				// Create a div for showing the note names
+				var notesDiv = $('<div id="name"></div>');
+				$(container).append(notesDiv);
+				
+				// Create the form of mode names
+				var form = $('<form id="choices"></form>');
+				$(container).append(form);
+				
+				var randomMode = JazzModes.randomMode({allowDoubleAccidentals: false});
+				
+				// Render the scale and note names
+				JazzModes.renderMode(randomMode, staveCanvas.get(0)); // Vexflow needs a selector
+				JazzModes.showNotes(randomMode, notesDiv);
+				var scaleName = JazzModes.modeName(randomMode);
+
+			    // Create form
+			    for(var i in JazzModes.scales) {
+			    	scale = JazzModes.scales[i];
+			    	form.append('<input type="radio" name="modeType" value="' + scale + '">' + scale + '</input>');
+			    }
+			    form.on('click', 'input[type=radio]', function(e) {
+			    	if (this.value == randomMode.name) {
+			    		alert("Well done, it's a " + scaleName + "!");
+			    	} else {
+			    		alert("No, it's a " + scaleName + "!");
+			    	}
+			    });
+			}
 		}
 	};
 })(window);
