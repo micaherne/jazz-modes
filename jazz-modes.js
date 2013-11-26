@@ -65,6 +65,10 @@
 					    Vex.Flow.Renderer.Backends.CANVAS);
 
 			  var ctx = renderer.getContext();
+			  
+			  // Clear the canvas and redraw (important for changing the mode without refresh)
+			  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 			  var stave = new Vex.Flow.Stave(10, 0, 600);
 			  stave.addClef("treble").setContext(ctx).draw();
 			  
@@ -126,37 +130,60 @@
 		
 		Game: {
 			IdentifyTheMode: function(container, config) {
-				// Create a canvas for showing the notation
-				var staveCanvas = $('<canvas class="canvas" width="700" height="200"></canvas>');
-				$(container).append(staveCanvas);
-				
-				// Create a div for showing the note names
-				var notesDiv = $('<div id="name"></div>');
-				$(container).append(notesDiv);
-				
-				// Create the form of mode names
-				var form = $('<form id="choices"></form>');
-				$(container).append(form);
-				
-				var randomMode = JazzModes.randomMode({allowDoubleAccidentals: false});
-				
-				// Render the scale and note names
-				JazzModes.renderMode(randomMode, staveCanvas.get(0)); // Vexflow needs a selector
-				JazzModes.showNotes(randomMode, notesDiv);
-				var scaleName = JazzModes.modeName(randomMode);
+				this.run = function() {
+					var scoreCount = 0;
+					
+					container = $(container); // make sure it's jQuery object
+					
+					// Create a canvas for showing the notation
+					var staveCanvas = $('<canvas class="canvas" width="700" height="200"></canvas>');
+					$(container).append(staveCanvas);
+					
+					// Create a div for showing the note names
+					var notesDiv = $('<div id="name"></div>');
+					$(container).append(notesDiv);
+					
+					// Create the form of mode names
+					var form = $('<form id="choices"></form>');
+					$(container).append(form);
+					
+					// Create a div for the score
+					var score = $('<div>0 correct</div>');
+					$(container).append(score);
+					
+					var randomMode = JazzModes.randomMode({allowDoubleAccidentals: false});
+					
+					// Render the scale and note names
+					JazzModes.renderMode(randomMode, staveCanvas.get(0)); // VexFlow need the actual DOM node
+					JazzModes.showNotes(randomMode, notesDiv);
+					var scaleName = JazzModes.modeName(randomMode);
 
-			    // Create form
-			    for(var i in JazzModes.scales) {
-			    	scale = JazzModes.scales[i];
-			    	form.append('<input type="radio" name="modeType" value="' + scale + '">' + scale + '</input>');
-			    }
-			    form.on('click', 'input[type=radio]', function(e) {
-			    	if (this.value == randomMode.name) {
-			    		alert("Well done, it's a " + scaleName + "!");
-			    	} else {
-			    		alert("No, it's a " + scaleName + "!");
-			    	}
-			    });
+				    // Create form
+				    for(var i in JazzModes.scales) {
+				    	scale = JazzModes.scales[i];
+				    	form.append('<input type="radio" name="modeType" value="' + scale + '">' + scale + '</input>');
+				    }
+				    form.on('click', 'input[type=radio]', function(e) {
+				    	if (this.value == randomMode.name) {
+				    		console.log("Well done, it's a " + scaleName + "!");
+				    		score.text(++scoreCount + " correct");
+				    	} else {
+				    		console.log("No, it's a " + scaleName + "!");
+				    	}
+
+			    		// TODO: Refactor - same as above
+			    		randomMode = JazzModes.randomMode({allowDoubleAccidentals: false});
+						
+						// Render the scale and note names
+						JazzModes.renderMode(randomMode, staveCanvas.get(0)); // VexFlow need the actual DOM node
+						JazzModes.showNotes(randomMode, notesDiv);
+						scaleName = JazzModes.modeName(randomMode);
+						
+						// Reset the form selection
+					    $('input[type=radio]', form).prop('checked', false);
+				    });
+				    
+				};
 			}
 		}
 	};
