@@ -130,8 +130,17 @@
 		
 		Game: {
 			IdentifyTheMode: function(container, config) {
+				this.config = {
+					showStave: true,
+					showNotes: false,
+					showScore: true,
+					showTime: false
+				}
+				$.extend(this.config, config);
+				
 				this.run = function() {
 					var scoreCount = 0;
+					var initialTime = new Date();
 					
 					container = $(container); // make sure it's jQuery object
 					
@@ -150,6 +159,14 @@
 					// Create a div for the score
 					var score = $('<div>0 correct</div>');
 					$(container).append(score);
+					
+					if (this.config.showTime) {
+						var timeDiv = $('<div>0 seconds</div>');
+						container.append(timeDiv);
+						setInterval(function() {
+							timeDiv.text(Math.floor((new Date() - initialTime) / 1000) + " seconds");
+						}, 200);
+					}
 					
 					var randomMode = JazzModes.randomMode({allowDoubleAccidentals: false});
 					
