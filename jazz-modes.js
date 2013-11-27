@@ -139,13 +139,14 @@
 				$.extend(this.config, config);
 				
 				this.run = function() {
-					var scoreCount = 0;
+					var scoreCorrect = 0;
+					var scoreIncorrect = 0;
 					var initialTime = new Date();
 					
 					container = $(container); // make sure it's jQuery object
 					
 					// Create a canvas for showing the notation
-					var staveCanvas = $('<canvas class="canvas" width="700" height="200"></canvas>');
+					var staveCanvas = $('<canvas class="canvas" width="700" height="120"></canvas>');
 					$(container).append(staveCanvas);
 					
 					// Create a div for showing the note names
@@ -157,7 +158,7 @@
 					$(container).append(form);
 					
 					// Create a div for the score
-					var score = $('<div>0 correct</div>');
+					var score = $('<div>0 correct, 0 incorrect</div>');
 					$(container).append(score);
 					
 					if (this.config.showTime) {
@@ -183,9 +184,10 @@
 				    form.on('click', 'input[type=radio]', function(e) {
 				    	if (this.value == randomMode.name) {
 				    		console.log("Well done, it's a " + scaleName + "!");
-				    		score.text(++scoreCount + " correct");
+				    		score.text(++scoreCorrect + " correct, " + scoreIncorrect + " incorrect");
 				    	} else {
 				    		console.log("No, it's a " + scaleName + "!");
+				    		score.text(scoreCorrect + " correct, " + ++scoreIncorrect + " incorrect");
 				    	}
 
 			    		// TODO: Refactor - same as above
